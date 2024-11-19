@@ -45,4 +45,8 @@ sudo openssl req -new -key tls.key -out tls.csr
 sudo openssl x509 -req -in tls.csr -signkey tls.key -out tls.crt -days 365
 sudo kubectl create secret tls tls-rancher --cert=tls.crt --key=tls.key -n cattle-system
 
+# longhorn
 sudo apt install -y open-iscsi
+helm repo add longhorn https://charts.longhorn.io
+helm repo update
+helm install longhorn longhorn/longhorn --namespace longhorn-system --create-namespace
