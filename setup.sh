@@ -32,12 +32,17 @@ helm install cert-manager jetstack/cert-manager --namespace cert-manager --creat
 # Rancher installation
 helm repo add rancher-latest https://releases.rancher.com/server-charts/latest
 kubectl create namespace cattle-system
-helm install rancher rancher-latest/rancher --namespace cattle-system --set hostname=<IP_OF_LINUX_NODE>.sslip.io --set replicas=1 --set bootstrapPassword=admin
+# 現在のIPアドレスを取得
+IP_ADDRESS=$(hostname -I | awk '{print $1}')
+
+# Rancher のインストール
+helm install rancher rancher-latest/rancher --namespace cattle-system \
+  --set hostname=${IP_ADDRESS}.sslip.io --set replicas=1 --set bootstrapPassword=admin
 
 # TLS setup using OpenSSL
 sudo openssl genpkey -algorithm RSA -out tls.key
 sudo openssl req -new -key tls.key -out tls.csr
 sudo openssl x509 -req -in tls.csr -signkey tls.key -out tls.crt -days 365
-kubectl create secret tls tls-rancher --cert=tls.crt --key=tls.key -n cattle-system
+sudo kubectl create secret tls tls-rancher --cert=tls.crt --key=tls.key -n cattle-system
 
 sudo apt install -y open-iscsi
